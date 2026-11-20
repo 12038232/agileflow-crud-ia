@@ -4,8 +4,7 @@
 > **Seminario:** Gestión de Software Ágil asistido por Inteligencia Artificial  
 > **Autor / Estudiante:** Santiago Gonzalez Reinoso 
 > **Enlaces de Entrega:**
-> - 📦 **Repositorio GitHub:** 
-> - 🎥 **Video Explicativo:** 
+> - 🎥 **Video Explicativo:** https://youtu.be/FRw9a-cDBhk 
 ---
 
 ## 📌 Descripción del Proyecto

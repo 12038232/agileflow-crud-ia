@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgileFlow - Gestión de Tareas Ágiles con IA</title>
+  <!-- Tailwind CSS via CDN para estilizado moderno y responsivo -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Iconos FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+
+  <!-- Encabezado / Navbar -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-brain text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            AgileFlow <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-medium">CRUD Asistido por IA</span>
+          </h1>
+          <p class="text-xs text-slate-400">Seminario: Gestión de Software Ágil con IA</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="btn-seed" class="text-xs text-slate-400 hover:text-slate-200 border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5" title="Cargar datos de ejemplo">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span class="hidden sm:inline">Recargar Ejemplos</span>
+        </button>
+        <button id="btn-new-task" class="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all transform hover:-translate-y-0.5">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nueva Tarea</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+    <!-- Panel de Métricas Rápidas (Agile Dashboard) -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-list-check"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Tareas</p>
+          <p id="stat-total" class="text-2xl font-bold text-white">0</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-spinner"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">En Progreso</p>
+          <p id="stat-progress" class="text-2xl font-bold text-amber-400">0</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Completadas</p>
+          <p id="stat-completed" class="text-2xl font-bold text-emerald-400">0</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-fire"></i>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Puntos de Historia</p>
+          <p id="stat-points" class="text-2xl font-bold text-purple-400">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Barra de Filtros, Búsqueda y Ordenamiento -->
+    <section class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 flex flex-col md:flex-row gap-3 items-center justify-between shadow-sm">
+      <!-- Buscador -->
+      <div class="relative w-full md:w-80">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Buscar por título, responsable..." 
+          class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+        >
+      </div>
+
+      <!-- Filtros -->
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial">
+          <label for="filter-status" class="text-xs text-slate-400 font-medium">Estado:</label>
+          <select id="filter-status" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">Todos</option>
+            <option value="Backlog">Backlog</option>
+            <option value="En Progreso">En Progreso</option>
+            <option value="En Revisión">En Revisión</option>
+            <option value="Completada">Completada</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial">
+          <label for="filter-priority" class="text-xs text-slate-400 font-medium">Prioridad:</label>
+          <select id="filter-priority" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="ALL">Todas</option>
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+            <option value="Crítica">Crítica</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista / Cuadrícula de Tareas (READ) -->
+    <section>
+      <div id="tasks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Tarjetas dinámicas inyectadas por app.js -->
+      </div>
+
+      <!-- Estado Vacío (Empty State) -->
+      <div id="empty-state" class="hidden text-center py-16 bg-slate-800/30 border border-dashed border-slate-700 rounded-3xl">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 text-2xl">
+          <i class="fa-solid fa-folder-open"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-300">No se encontraron tareas</h3>
+        <p class="text-sm text-slate-500 max-w-sm mx-auto mt-1 mb-4">
+          Crea una nueva tarea o modifica tus filtros de búsqueda.
+        </p>
+        <button id="btn-empty-create" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition">
+          <i class="fa-solid fa-plus mr-1.5"></i> Crear mi primera tarea
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pie de página -->
+  <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <p>Desarrollado con prompts de Inteligencia Artificial &bull; Metodología Ágil</p>
+      <p class="text-slate-400 font-mono">CRUD: Create &bull; Read &bull; Update &bull; Delete</p>
+    </div>
+  </footer>
+
+  <!-- MODAL: CREAR / EDITAR TAREA (CREATE & UPDATE) -->
+  <div id="task-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-slate-800 border border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-700 mb-5">
+        <h2 id="modal-title" class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-indigo-400"></i>
+          <span>Nueva Tarea</span>
+        </h2>
+        <button id="btn-close-modal" class="text-slate-400 hover:text-white text-lg w-8 h-8 rounded-lg hover:bg-slate-700 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="task-form" class="space-y-4">
+        <input type="hidden" id="task-id">
+
+        <!-- Título -->
+        <div>
+          <label for="task-title" class="block text-xs font-semibold uppercase text-slate-300 mb-1.5">
+            Título de la Tarea / Historia <span class="text-rose-400">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="task-title" 
+            required 
+            placeholder="Ej. Implementar login con Google OAuth" 
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+          >
+          <p id="error-title" class="text-xs text-rose-400 mt-1 hidden">El título es obligatorio (mínimo 3 caracteres).</p>
+        </div>
+
+        <!-- Descripción -->
+        <div>
+          <label for="task-desc" class="block text-xs font-semibold uppercase text-slate-300 mb-1.5">
+            Descripción y Criterios de Aceptación
+          </label>
+          <textarea 
+            id="task-desc" 
+            rows="3" 
+            placeholder="Como usuario quiero autenticarme para acceder a mi tablero..." 
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Responsable y Puntos de Historia -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="task-assignee" class="block text-xs font-semibold uppercase text-slate-300 mb-1.5">
+              Responsable <span class="text-rose-400">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="task-assignee" 
+              required 
+              placeholder="Ej. Carlos Dev" 
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            >
+          </div>
+
+          <div>
+            <label for="task-points" class="block text-xs font-semibold uppercase text-slate-300 mb-1.5">
+              Puntos Story (Fibonacci)
+            </label>
+            <select id="task-points" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="1">1 Punto (Trivial)</option>
+              <option value="2">2 Puntos (Fácil)</option>
+              <option value="3" selected>3 Puntos (Medio)</option>
+              <option value="5">5 Puntos (Complejo)</option>
+              <option value="8">8 Puntos (Muy Complejo)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Estado y Prioridad -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="task-status" class="block text-xs font-semibold uppercase text-slate-300 mb-1.5">
+              Estado
+            </label>
+            <select id="task-status" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="Backlog">Backlog</option>
+              <option value="En Progreso">En Progreso</option>
+              <option value="En Revisión">En Revisión</option>
+              <option value="Completada">Completada</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="task-priority" class="block text-xs font-semibold uppercase text-slate-300 mb-1.5">
+              Prioridad
+            </label>
+            <select id="task-priority" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="Baja">Baja</option>
+              <option value="Media" selected>Media</option>
+              <option value="Alta">Alta</option>
+              <option value="Crítica">Crítica</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Botones de Acción Modal -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-700">
+          <button type="button" id="btn-cancel-modal" class="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-700 text-sm font-medium transition">
+            Cancelar
+          </button>
+          <button type="submit" id="btn-save-task" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition">
+            Guardar Tarea
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR ELIMINACIÓN (DELETE) -->
+  <div id="delete-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+      <div class="w-14 h-14 mx-auto rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center text-2xl mb-4 border border-rose-500/20">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-2">¿Eliminar esta tarea?</h3>
+      <p class="text-xs text-slate-400 mb-6">Esta acción es permanente y eliminará el registro de tu base de datos local.</p>
+      
+      <div class="flex items-center justify-center gap-3">
+        <button id="btn-cancel-delete" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-700 text-xs font-semibold transition">
+          Cancelar
+        </button>
+        <button id="btn-confirm-delete" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/30 transition">
+          Sí, eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Notificaciones Toast -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Lógica de la aplicación -->
+  <script src="app.js"></script>
+</body>
+</html>

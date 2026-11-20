@@ -37,18 +37,11 @@ Para ejecutar el proyecto **no se requiere instalar Node.js ni bases de datos ex
 ### Opción 1: Ejecución Directa (Recomendada)
 1. Descarga o clona el repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/agileflow-crud-ia.git
+   https://github.com/12038232/agileflow-crud-ia.git
    ```
 2. Dirígete a la carpeta del proyecto.
 3. Haz doble clic sobre el archivo `index.html` para abrirlo en cualquier navegador web moderno (Google Chrome, Microsoft Edge, Firefox, Brave, Safari).
-
-### Opción 2: Con Visual Studio Code (Live Server)
-1. Abre la carpeta del proyecto en **VS Code**.
-2. Haz clic derecho sobre `index.html` y selecciona **"Open with Live Server"**.
-3. La aplicación se abrirá automáticamente en `http://127.0.0.1:5500`.
-
 ---
-
 ## 🔄 Explicación de las Operaciones CRUD
 
 La aplicación implementa fielmente las cuatro operaciones fundamentales:
